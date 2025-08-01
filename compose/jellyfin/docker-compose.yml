@@ -1,0 +1,14 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin
+    container_name: jellyfin
+    environment:
+      - PUID=1001
+      - PGID=1001
+    ports:
+      - 8096:8096
+    volumes:
+      - ${CONFIG_ROOT}/jellyfin/config:/config
+      - ${CONFIG_ROOT}/jellyfin/cache:/cache
+      - ${MEDIA1}:/media
+    restart: unless-stopped
