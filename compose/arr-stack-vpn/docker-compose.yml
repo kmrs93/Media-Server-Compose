@@ -1,42 +1,32 @@
-###ARR-STACK-VPN#####
+version: '3.8'
 
 services:
   gluetun:
     image: qmcgaw/gluetun
     container_name: gluetun
-    # line above must be uncommented to allow external containers to connect.
-    # See https://github.com/qdm12/gluetun-wiki/blob/main/setup/connect-a-container-to-gluetun.md#external-container-to-gluetun
     cap_add:
       - NET_ADMIN
     devices:
       - /dev/net/tun:/dev/net/tun
     ports:
-      - ${QBIT_TCPUDP}:${QBIT_TCPUDP}
-      - ${QBIT_TCPUDP}:${QBIT_TCPUDP}/udp
-      - ${QBIT_WEBUI}:${QBIT_WEBUI} # qbit
-      - ${SONARR_WEBUI}:8989 # Sonarr
-      - ${RADARR_WEBUI}:7878 # Radarr
-      - ${PROWLARR_WEBUI}:9696 # Prowlarr
+      - 6881:6881
+      - 6881:6881/udp
+      - 8080:8080       # qBittorrent Web UI
+      - 1111:8989       # Sonarr
+      - 2222:7878       # Radarr
+      - 3333:9696       # Prowlarr
     volumes:
       - ${GLUETON_CONFIG}:/gluetun
     environment:
-      # See https://github.com/qdm12/gluetun-wiki/tree/main/setup#setup
       - VPN_SERVICE_PROVIDER=${VPN_SERVICE_PROVIDER}
       - VPN_TYPE=wireguard
-      # OpenVPN:
-      # - OPENVPN_USER=
-      # - OPENVPN_PASSWORD=
-      # Wireguard:
       - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
-      # See https://github.com/qdm12/gluetun-wiki/blob/main/setup/providers/nordvpn.md#obtain-your-wireguard-private-key
       - WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES}
       - SERVER_REGIONS=${SERVER_REGIONS}
-      # Timezone for accurate log times
       - TZ=Asia/Kolkata
-      # Server list updater
-      # See https://github.com/qdm12/gluetun-wiki/blob/main/setup/servers.md#update-the-vpn-servers-list
       - UPDATER_PERIOD=24h
     restart: unless-stopped
+
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
@@ -50,6 +40,7 @@ services:
       - ${DOWNLOAD_FOLDER}:/downloads
       - ${MEDIA_FOLDER}:/media
     restart: unless-stopped
+
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
@@ -63,6 +54,7 @@ services:
       - ${DOWNLOAD_FOLDER}:/downloads
       - ${MEDIA_FOLDER}:/media
     restart: unless-stopped
+
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
@@ -76,6 +68,7 @@ services:
       - ${DOWNLOAD_FOLDER}:/downloads
       - ${MEDIA_FOLDER}:/media
     restart: unless-stopped
+
   bazarr:
     image: lscr.io/linuxserver/bazarr:latest
     container_name: bazarr
@@ -88,8 +81,9 @@ services:
       - ${DOWNLOAD_FOLDER}:/downloads
       - ${MEDIA_FOLDER}:/media
     ports:
-      - ${BAZARR_WEBUI}:6767
+      - 4444:6767
     restart: unless-stopped
+
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
@@ -98,11 +92,12 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Kolkata
-      - WEBUI_PORT=${QBIT_WEBUI}
-      - TORRENTING_PORT=${QBIT_TCPUDP}
+      - WEBUI_PORT=8080
+      - TORRENTING_PORT=6881
       - DOCKER_MODS=ghcr.io/vuetorrent/vuetorrent-lsio-mod:latest
     volumes:
       - ${QBIT_CONFIG}:/config
       - ${DOWNLOAD_FOLDER}:/downloads
     restart: unless-stopped
+
 networks: {}
