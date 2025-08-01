@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  navidrome:
+    image: deluan/navidrome:latest
+    user: 1001:1001 # should be owner of volumes
+    ports:
+      - "5555:4533"
+    restart: unless-stopped
+    #environment:
+      # ND_LOGLEVEL: debug
+    volumes:
+      - ${CONFIG_ROOT}/navidrome:/data
+      - ${MEDIA_FOLDER}/music:/music:ro
