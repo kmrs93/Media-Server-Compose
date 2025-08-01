@@ -1,0 +1,35 @@
+services:
+  homarr:
+    container_name: homarr
+    image: ghcr.io/ajnart/homarr:latest
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # Optional, only if you want docker integration
+      - ${CONFIG_ROOT}/homarr/configs:/app/data/configs
+      - ${CONFIG_ROOT}/homarr/icons:/app/public/icons
+      - ${CONFIG_ROOT}/homarr/data:/data
+    ports:
+      - '7575:7575'
+
+  dash:
+    image: mauricenino/dashdot:latest
+    restart: unless-stopped
+    privileged: true
+    ports:
+      - '6001:3001'
+    volumes:
+      - /:/mnt/host:ro
+
+  organizr:
+    container_name: organizr
+    hostname: organizr
+    image: organizr/organizr:latest
+    restart: unless-stopped
+    ports:
+      - 6060:80
+    volumes:
+      - ${CONFIG_ROOT}/organizr/config:/config
+    environment:
+      - PUID=1001
+      - PGID=1001
+      - TZ=Asia/Kolkata
